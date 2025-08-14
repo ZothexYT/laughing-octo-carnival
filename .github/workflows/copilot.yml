@@ -9,8 +9,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Create vm_data folder
         run: mkdir -p vm_data
@@ -24,8 +22,10 @@ jobs:
             echo "debug-backup branch doesn't exist yet — skipping restore"
           fi
 
-      - name: Start SSHX session
-        run: curl -sSf https://sshx.io/get | sh -s run
+      - name: Start SSHX session in background
+        run: |
+          nohup sh -c 'curl -sSf https://sshx.io/get | sh -s run' > sshx.log 2>&1 &
+          echo "SSHX session started in background"
 
       - name: Sleep for 2 minutes
         run: sleep 120
