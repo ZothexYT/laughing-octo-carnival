@@ -28,9 +28,15 @@ jobs:
       - name: Start tmate session in background and print URL
         run: |
           nohup tmate -F > tmate.log 2>&1 &
-          sleep 3
-          echo "🔗 tmate Session Link:"
-          grep -Eo 'ssh://[^\"]+' tmate.log || echo "tmate URL not found yet"
+          echo "⏳ Waiting for tmate SSH URL..."
+          for i in {1..30}; do
+            if grep -Eo 'ssh://[^\"]+' tmate.log; then
+              grep -Eo 'https://tmate.io/t/[^\"]+' tmate.log || true
+              break
+            fi
+            sleep 1
+          done
+          echo "✅ SSH URL captured (moving to next step)"
 
       - name: Sleep for 2 minutes
         run: sleep 120
