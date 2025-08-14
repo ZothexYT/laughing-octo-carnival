@@ -30,9 +30,6 @@ jobs:
       - name: Sleep for 2 minutes
         run: sleep 120
 
-      - name: Optional: Start tmate session
-        uses: mxschmitt/action-tmate@v3
-
       - name: Save current state
         run: |
           echo "Backup at $(date)" > vm_data/last_backup.txt
