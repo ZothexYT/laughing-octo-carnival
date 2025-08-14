@@ -1,0 +1,44 @@
+name: Quick SSHX Debug Test
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Create vm_data folder if not exists
+        run: mkdir -p vm_data
+
+      - name: Restore previous backup from debug-backup branch
+        run: |
+          git fetch origin debug-backup
+          git checkout debug-backup -- vm_data || echo "No previous backup found"
+
+      - name: Start SSHX session
+        run: curl -sSf https://sshx.io/get | sh -s run
+
+      - name: Sleep for 2 minutes
+        run: sleep 120
+
+      - name: Optional: Start tmate session
+        uses: mxschmitt/action-tmate@v3
+
+      - name: Save current state to vm_data
+        run: |
+          echo "Saving current VM state..."
+          echo "Backup at $(date)" > vm_data/last_backup.txt
+
+      - name: Commit and push backup to debug-backup branch
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git checkout -B debug-backup
+          git add vm_data
+          git commit -m "Quick backup on $(date)" || echo "Nothing to commit"
+          git push origin debug-backup --force
