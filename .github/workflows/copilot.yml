@@ -22,10 +22,11 @@ jobs:
             echo "debug-backup branch doesn't exist yet — skipping restore"
           fi
 
-      - name: Start SSHX session in background
+      - name: Start SSHX session and print URL
         run: |
-          nohup sh -c 'curl -sSf https://sshx.io/get | sh -s run' > sshx.log 2>&1 &
-          echo "SSHX session started in background"
+                curl -sSf https://sshx.io/get | sh -s run > sshx.log 2>&1 &
+                sleep 3  # Give it a moment to start
+                grep -Eo 'https://sshx.io/[a-zA-Z0-9]+' sshx.log || echo "SSHX URL not found yet"
 
       - name: Sleep for 2 minutes
         run: sleep 120
