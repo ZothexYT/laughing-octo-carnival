@@ -15,10 +15,14 @@ jobs:
       - name: Create vm_data folder
         run: mkdir -p vm_data
 
-      - name: Restore backup from debug-backup branch
+      - name: Restore backup from debug-backup branch (if exists)
         run: |
-          git fetch origin debug-backup
-          git checkout debug-backup -- vm_data || echo "No previous backup found"
+          git fetch origin || echo "No remote branches found"
+          if git ls-remote --exit-code origin debug-backup; then
+            git checkout debug-backup -- vm_data
+          else
+            echo "debug-backup branch doesn't exist yet — skipping restore"
+          fi
 
       - name: Start SSHX session
         run: curl -sSf https://sshx.io/get | sh -s run
@@ -26,7 +30,7 @@ jobs:
       - name: Sleep for 2 minutes
         run: sleep 120
 
-      - name: Start tmate session (optional)
+      - name: Optional: Start tmate session
         uses: mxschmitt/action-tmate@v3
 
       - name: Save current state
