@@ -27,25 +27,16 @@ jobs:
         uses: mxschmitt/action-tmate@v3
         with:
           detached: true
-          timeout-minutes: 15  # auto close after 15 minutes
+          timeout-minutes: 15
 
-      - name: Show tmate URLs
-        run: |
-          echo "🔗 SSH command: ${{ steps.tmate.outputs.ssh-command }}"
-          echo "🌐 Web URL: ${{ steps.tmate.outputs.web-url }}"
-
-      - name: Sleep for 2 minutes
-        run: sleep 120
-
-      - name: Save current state
-        run: |
-          echo "Backup at $(date)" > vm_data/last_backup.txt
-
+      # Auto-save everything in vm_data at the end of the job
       - name: Commit and push backup
+        if: always()
         run: |
+          cd "${GITHUB_WORKSPACE}"
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git checkout -B debug-backup
           git add vm_data
-          git commit -m "Backup on $(date)" || echo "Nothing to commit"
+          git commit -m "Auto-backup at $(date)" || echo "Nothing to commit"
           git push origin debug-backup --force
